@@ -10,7 +10,7 @@ time out or cannot be parsed are recorded as such, not as errors.
 
 Usage: python crosscheck.py N_RANDOM SEED
 """
-import json, random, re, subprocess, sys, time
+import json, os, random, re, subprocess, sys, tempfile, time
 import mpmath as mp
 import sympy as sp
 
@@ -85,9 +85,10 @@ def run_maxima(expr):
 
 
 def run_giac(expr):
-    with open("/tmp/claude-0/-home-claude/f0f7433c-e8b2-5691-85cf-a9b7e7fa1f95/scratchpad/giac_in.txt", "w") as f:
+    path = os.path.join(tempfile.gettempdir(), "giac_in.txt")
+    with open(path, "w") as f:
         f.write(f"integrate({expr},x)\n")
-    p = subprocess.run(["icas", "/tmp/claude-0/-home-claude/f0f7433c-e8b2-5691-85cf-a9b7e7fa1f95/scratchpad/giac_in.txt"],
+    p = subprocess.run(["icas", path],
                        capture_output=True, text=True, timeout=TIMEOUT)
     lines = [l for l in p.stdout.splitlines() if l.strip() and not l.startswith("//")]
     if not lines:
